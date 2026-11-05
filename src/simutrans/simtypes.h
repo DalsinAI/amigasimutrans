@@ -164,7 +164,12 @@ typedef unsigned long long  uint64;
 #	pragma warning(disable: 4200 4311 4800 4996)
 #else
 #	define GCC_PACKED    __attribute__ ((__packed__))
-#	define GCC_ALIGN(a)  __attribute__ ((aligned (a)))
+#	ifdef __amigaos__
+		// Amiga hunk objects align to 8 bytes at most; keeping threads off each other's cache lines does not matter with one thread
+#		define GCC_ALIGN(a)
+#	else
+#		define GCC_ALIGN(a)  __attribute__ ((aligned (a)))
+#	endif
 #	define MSVC_ALIGN(a)
 #	define NORETURN      __attribute__ ((noreturn))
 #endif

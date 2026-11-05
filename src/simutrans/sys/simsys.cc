@@ -354,6 +354,10 @@ int dr_rename(const char *existing_utf8, const char *new_utf8)
 #endif
 }
 
+#ifdef __amigaos__
+extern "C" int amiga_is_drawer(const char *path);
+#endif
+
 int dr_chdir(const char *path)
 {
 #ifdef _WIN32
@@ -371,6 +375,13 @@ int dr_chdir(const char *path)
 	}
 
 	return success ? 0 : -1;
+#elif defined __amigaos__
+	// AmigaDOS would make a file the current "directory" (amiga/amiga_dir.c)
+	if(  !amiga_is_drawer(path)  ) {
+		errno = ENOTDIR;
+		return -1;
+	}
+	return chdir(path);
 #else
 	return chdir(path);
 #endif
@@ -462,6 +473,20 @@ gzFile dr_gzopen(const char *path, const char *mode)
 }
 
 
+#ifdef __amigaos__
+// AmigaDOS: "Work:" is a volume's root, "Work:/" its parent (an error)
+static void append_path_separator(char *path)
+{
+	size_t const len = strlen(path);
+	if(  len == 0  ||  (path[len-1] != ':'  &&  path[len-1] != '/')  ) {
+		strcat( path, PATH_SEPARATOR );
+	}
+}
+#else
+#define append_path_separator(path) strcat( (path), PATH_SEPARATOR )
+#endif
+
+
 bool check_and_set_dir( const char *path, const char *info, char *result, const char *testfile)
 {
 	if(  path  &&  *path  ) {
@@ -483,7 +508,7 @@ bool check_and_set_dir( const char *path, const char *info, char *result, const 
 		}
 		else {
 			dr_getcwd( result, PATH_MAX-1 );
-			strcat( result, PATH_SEPARATOR );
+			append_path_separator( result );
 			return true;
 		}
 	}
@@ -514,9 +539,14 @@ bool dr_set_basedir(const char * base_dir_arg, char * executable_path)
 	found_basedir = check_and_set_dir( base_dir_arg, "-set_basedir", env_t::base_dir, "config/simuconf.tab");
 	if( !found_basedir ) {
 		found_basedir = check_and_set_dir( getenv("SIMUTRANS_BASEDIR"), "SIMUTRANS_BASEDIR", env_t::base_dir, "config/simuconf.tab");
+#ifdef __amigaos__
+		if( !found_basedir ) {
+			found_basedir = check_and_set_dir( "PROGDIR:", "PROGDIR:", env_t::base_dir, "config/simuconf.tab");
+		}
+#endif
 		if( !found_basedir ) {
 			dr_getcwd(env_t::base_dir, lengthof(env_t::base_dir));
-			strcat( env_t::base_dir, PATH_SEPARATOR );
+			append_path_separator( env_t::base_dir );
 			// test if base installation
 			if (FILE* f = dr_fopen("config/simuconf.tab", "r")) {
 				fclose(f);
@@ -570,6 +600,12 @@ bool dr_set_basedir(const char * base_dir_arg, char * executable_path)
 char const *dr_query_homedir()
 {
 	static char buffer[PATH_MAX + 24];
+
+#ifdef __amigaos__
+	// saves, settings and screenshots go beside the program
+	tstrncpy(buffer, "PROGDIR:", lengthof(buffer));
+	return buffer;
+#endif
 
 #if defined _WIN32
 	WCHAR whomedir[MAX_PATH];
@@ -644,6 +680,11 @@ char const *dr_query_homedir()
 char const *dr_query_installdir()
 {
 	static char buffer[PATH_MAX + 24];
+
+#ifdef __amigaos__
+	tstrncpy(buffer, "PROGDIR:", lengthof(buffer));
+	return buffer;
+#endif
 
 #if defined _WIN32
 	WCHAR whomedir[MAX_PATH];
@@ -724,6 +765,9 @@ const char *dr_query_fontpath(int which)
 		"/boot/system/data/fonts/ttfonts/",
 #elif defined __ANDROID__
 		"/system/fonts/",
+#elif defined __amigaos__
+		"PROGDIR:font/",
+		"FONTS:",
 #else
 		"~/.fonts/",
 		"~/.local/share/fonts/",
@@ -1518,6 +1562,11 @@ bool dr_download_pakset( const char *data_dir, bool portable )
 	}
 	dr_restore_fullscreen(old_fullscreen);
 	return true;
+#elif defined __amigaos__
+	// no network, no shell script: pak64 comes in the drawer
+	(void)data_dir;
+	(void)portable;
+	return false;
 #else
 	(void)portable;
 
@@ -1667,9 +1716,13 @@ int sysmain(int const argc, char** const argv)
 		}
 	}
 #	endif
+#	ifndef __amigaos__
 	// no process file system => need to parse argv[0]
 	/* should work on most unix or gnu systems */
 	argv_copy[0] = realpath(argv_copy[0], buffer2);
+#	else
+	(void)buffer2;
+#	endif
 #endif
 
 	setlocale( LC_CTYPE, "" );

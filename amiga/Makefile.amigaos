@@ -1,0 +1,118 @@
+# Simutrans for AmigaOS 3.x, 68040/68060 + FPU, on OpenGPU's SDL 2.
+#
+#   make -f amiga/Makefile.amigaos -j2 \
+#        STOVE=/path/to/openamigagcc-16.2.0-open4 \
+#        NDK=/path/to/OpenNDK/Include_H SDL2KIT=/path/to/opengpu-sdk \
+#        DEPS=/path/to/m68k-amigaos PAK64ZIP=/path/to/simupak64-125-0.zip
+#
+# STOVE is GFOpenAmigaGCC 16.2.0-open4 or later. SDL2KIT is the OpenGPU
+# developer kit: libSDL2.a, the program's half of LIBS:OpenGPU/SDL2.module.
+# DEPS holds the static zlib, libpng, bzip2 and FreeType built by
+# amiga/deps/build-m68k-libs.sh (zlib png bzip2 freetype, one at a time).
+# Upstream's sdl2 backend (sys/simsys_s2.cc, sound/sdl2_sound.cc), no MIDI
+# (music/no_midi.cc), no zstd, no UPnP, no fontconfig, one thread. The
+# network is off: amiga/include/ and amiga/net_stubs.c. The game drawer,
+# with pak64 and Simutrans' own data, is $(OUT) (make ... dist).
+# Never more than -j2: the C++ is heavy and the build machine short of
+# memory; the biggest files are best built with -j1.
+
+STOVE   ?= $(HOME)/CradleLab/toolchain/openamigagcc-16.2.0-open4-x86_64-linux
+NDK     ?= $(HOME)/CradleLab/gfopensdk/OpenNDK/Include_H
+SDL2KIT ?= /mnt/amigachrome/team2/deps/opengpu-sdk
+DEPS    ?= /mnt/amigachrome/team2/deps/m68k-amigaos
+PAK64ZIP ?= /mnt/amigachrome/team2/deps/src-dl/pak64-125-0/simupak64-125-0.zip
+CC      = $(STOVE)/bin/m68k-amigaos-gcc
+CXX     = $(STOVE)/bin/m68k-amigaos-g++
+STRIP   = $(STOVE)/bin/m68k-amigaos-strip
+CPU     ?= -m68040 -m68881
+# -fno-tree-loop-distribute-patterns: GCC 16's loop miscompile (the kit's
+# sdl2-config gives it for GCC 16 too).
+OPT     ?= -O2 -fomit-frame-pointer -fno-tree-loop-distribute-patterns
+
+# As upstream's Makefile for a big-endian machine with the sdl2 backend:
+# 16-bit colour (RGB565), no debug messages.
+DEFS    = -DSIM_BIG_ENDIAN -DCOLOUR_DEPTH=16 -DNDEBUG -DMSG_LEVEL=1
+INC     = -Iamiga/include -I$(DEPS)/include -I$(DEPS)/include/freetype2 \
+          -I$(SDL2KIT)/include/SDL2 -I$(SDL2KIT)/include
+COMMON  = -noixemul $(OPT) $(CPU) $(DEFS) $(INC)
+CXXFLAGS = $(COMMON) -std=gnu++14 -include amiga/amiga_prelude.h
+CFLAGS   = $(COMMON)
+AMIGAWARN = -Wall -Wextra
+LDFLAGS = -noixemul $(CPU)
+LIBS    = -L$(DEPS)/lib -lfreetype -lpng -lbz2 -lz -L$(SDL2KIT)/lib -lSDL2 -lm
+BUILD   = build/amigaos
+OBJDIR  = $(BUILD)/obj
+OUT     = dist/Simutrans
+PROG    = Simutrans
+# Simutrans reads every translation in text/ (and the pak's) at start-up
+# and keeps them all in memory: about 2.4 MB of them. The drawer has the
+# Latin-alphabet ones most Amigas speak; any other upstream .tab (and its
+# help drawer) can be copied into text/ beside them.
+LANGS   ?= en de fr es it nl sv pl
+
+# Upstream's common sources are the unindented SOURCES lines of its
+# Makefile; the backend's are those upstream picks for BACKEND=sdl2 on a
+# system that is not Windows or macOS.
+SRC     = $(subst $$(COLOUR_DEPTH),16,$(shell sed -n 's/^SOURCES += \(src\/[^ ]*\.cc\)[ ]*$$/\1/p' Makefile)) \
+          src/simutrans/sys/clipboard_s2.cc src/simutrans/sys/simsys_s2.cc \
+          src/simutrans/sound/sdl2_sound.cc src/simutrans/music/no_midi.cc
+OBJS    = $(SRC:%.cc=$(OBJDIR)/%.o) \
+          $(OBJDIR)/amiga/stack.o $(OBJDIR)/amiga/pthread_stubs.o \
+          $(OBJDIR)/amiga/amiga_screens.o $(OBJDIR)/amiga/net_stubs.o \
+          $(OBJDIR)/amiga/amiga_dir.o
+
+ICONS   = $(wildcard amiga/icons/*.info)
+
+all: $(BUILD)/$(PROG)
+
+$(BUILD)/$(PROG): $(OBJS)
+	$(CXX) $(LDFLAGS) -o $@.debug $(OBJS) $(LIBS)
+	$(STRIP) -o $@ $@.debug
+
+src/simutrans/revision.h:
+	printf '#define REVISION' > $@
+
+# The drawer: the program, Simutrans' own data (config, fonts, the English
+# and other translations, themes, the AI and scenario scripts) and pak64.
+# No music: there is no MIDI player.
+dist: $(BUILD)/$(PROG) $(ICONS) amiga/simuconf-amiga.tab AMIGA_PORT.md
+	rm -rf $(OUT)
+	mkdir -p $(OUT)
+	cp $(BUILD)/$(PROG) $(OUT)/$(PROG)
+	cp -R simutrans/config simutrans/font simutrans/themes \
+	      simutrans/script simutrans/ai $(OUT)/
+	mkdir -p $(OUT)/text
+	for l in $(LANGS); do cp simutrans/text/$$l.tab $(OUT)/text/; \
+	  if [ -d simutrans/text/$$l ]; then cp -R simutrans/text/$$l $(OUT)/text/; fi; done
+	cat amiga/simuconf-amiga.tab simutrans/config/simuconf.tab > $(OUT)/config/simuconf.tab
+	rm -rf $(BUILD)/pak64 && mkdir -p $(BUILD)/pak64
+	cd $(BUILD)/pak64 && unzip -q $(PAK64ZIP)
+	mv $(BUILD)/pak64/simutrans/pak $(OUT)/pak
+	cd $(OUT)/pak/text && for f in *.tab; do \
+	  case " $(LANGS) " in *" $${f%.tab} "*) ;; *) rm -f $$f ;; esac; done
+	mkdir -p $(OUT)/save $(OUT)/screenshot $(OUT)/maps
+	cp AMIGA_PORT.md $(OUT)/ReadMe
+	cp LICENSE.txt $(OUT)/LICENSE.txt
+	cp simutrans/readme.txt $(OUT)/readme.txt
+	cp amiga/icons/Simutrans.info amiga/icons/ReadMe.info $(OUT)/
+	cp amiga/icons/ReadMe.info $(OUT)/LICENSE.txt.info
+	cp amiga/icons/ReadMe.info $(OUT)/readme.txt.info
+	cd $(OUT) && find . -mindepth 1 -type d | while read d; do cp $(CURDIR)/amiga/icons/Data.info "$$d.info"; done
+	cp amiga/icons/Simutrans-drawer.info dist/Simutrans.info
+
+$(OBJDIR)/amiga/%.o: amiga/%.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) $(AMIGAWARN) -I$(NDK) -c -o $@ $<
+
+# Upstream's files build with upstream's warnings off: its Makefile's -Wall
+# speaks of code that is not the port's.
+$(OBJDIR)/%.o: %.cc src/simutrans/revision.h
+	@mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+objs: $(OBJS)
+
+clean:
+	rm -rf $(BUILD) $(OUT) dist/Simutrans.info
+
+.PHONY: all dist objs clean

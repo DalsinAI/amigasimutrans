@@ -37,6 +37,12 @@ extern char **__argv;
 #include "../music/music.h"
 #include "../utils/unicode.h"
 
+#ifdef __amigaos__
+// see amiga/amiga_screens.c
+extern "C" void amiga_screens_snapshot(void);
+extern "C" void amiga_screens_close_leftovers(void);
+#endif
+
 
 // Maybe Linux is not fine too, had critical bugs...
 #if !defined(__linux__)
@@ -309,6 +315,11 @@ static int SDLCALL my_event_filter(void* /*userdata*/, SDL_Event* event)
  */
 bool dr_os_init(const int* parameter)
 {
+#ifdef __amigaos__
+	amiga_screens_snapshot();
+	// atexit() runs last in, first out: after SDL_Quit() below
+	atexit( amiga_screens_close_leftovers );
+#endif
 	if(  SDL_Init( SDL_INIT_VIDEO ) != 0  ) {
 		dbg->error("dr_os_init(SDL2)", "Could not initialize SDL: %s", SDL_GetError() );
 		return false;
@@ -467,8 +478,14 @@ int dr_os_open(const scr_size window_size, sint16 fs)
 	// especially 64bit want a border of 8bytes
 	const int tex_pitch = (tex_w + 15) & 0x7FF0;
 
+#ifdef __amigaos__
+	// A screen of the game's own in the size asked for: the Workbench's
+	// (SDL_WINDOW_FULLSCREEN_DESKTOP) is often far more than a 68040 can fill.
+	Uint32 flags = fullscreen ? SDL_WINDOW_FULLSCREEN : SDL_WINDOW_RESIZABLE;
+#else
 	// SDL2 only works with borderless fullscreen (SDL_WINDOW_FULLSCREEN_DESKTOP)
 	Uint32 flags = fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : SDL_WINDOW_RESIZABLE;
+#endif
 	flags |= SDL_WINDOW_ALLOW_HIGHDPI; // apparently needed for Apple retina displays
 #ifdef __ANDROID__
 	// needed for landscape apparently
@@ -1282,6 +1299,14 @@ int main(int argc, char **argv)
 #ifdef _WIN32
 	int    const argc = __argc;
 	char** const argv = __argv;
+#endif
+#ifdef __amigaos__
+	// started from the Workbench: libnix gives no arguments at all
+	if(  argc == 0  ) {
+		static char prog_name[] = "Simutrans";
+		static char *wb_argv[] = { prog_name, NULL };
+		return sysmain(1, wb_argv);
+	}
 #endif
 	return sysmain(argc, argv);
 }
