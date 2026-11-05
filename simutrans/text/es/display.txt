@@ -1,0 +1,125 @@
+<title>Ayuda sobre los Ajustes de pantalla</title>
+
+<h1><strong>Ajustes de pantalla</strong></h1>
+
+<p>
+La ventana <strong>Ajustes de pantalla</strong> tiene los controles del aspecto del juego y ofrece información sobre el rendimiento del ordenador.
+</p>
+
+<p>
+Pulsa el botón <em>Pantalla</em> en el menú <a href="options.txt">Opciones de Juego</a> para abrir la ventana <strong>Ajustes de pantalla</strong>.
+</p>
+
+<p>
+Pulsa los botones cuadrados para seleccionar opciones (el botón queda hundido cuando la opción está activada), o usa los botones de flecha para ajustar los valores:
+</p>
+
+<p>
+<em>Mostrar cuadrícula:</em> muestra las líneas que separan cada casilla; resulta útil al modificar el terreno.
+</p>
+
+<p>
+<em>Vista subterránea:</em> deja ver bajo el suelo; ahí puedes construir redes de transporte mediante túneles. Se muestran a la vez todos los niveles del subsuelo.
+</p>
+
+<p>
+<em>Vista subterránea por capas:</em> en este modo también puedes construir bajo tierra; el mapa se corta a la altura indicada y solo se muestran los túneles de ese nivel. El nivel se ajusta con las flechas, o escribiendo directamente un número en la casilla.
+</p>
+
+<p>
+<em>Alternar vista día/noche:</em> si está activado, el juego alterna entre el día y la noche.
+</p>
+
+<p>
+<em>Luminosidad:</em> ajusta lo clara u oscura que se ve la imagen del juego; los valores más altos oscurecen más. Los valores demasiado altos o demasiado bajos dan problemas.
+</p>
+
+<p>
+<em>Invertir desplazamiento:</em> invierte la dirección en la que se desplaza la vista en la <a href="window.txt">Ventana de juego</a>.
+</p>
+
+<p>
+<em>Velocidad de desplazamiento:</em> establece la velocidad a la que se desplaza la vista.
+</p>
+
+<p>
+<em>Transparentar en lugar de ocultar:</em> los objetos marcados como ocultos (árboles o determinados edificios) se muestran semitransparentes en vez de desaparecer.
+</p>
+
+<p>
+<em>Ocultar árboles:</em> se ocultan todos los árboles.
+</p>
+
+<p>
+<em>Modo de visualización de edificios:</em> con las flechas puedes elegir si no se oculta ningún edificio, si se ocultan solo los <em>edificios urbanos</em> o si se ocultan <em>todos los edificios</em>.
+</p>
+
+<p>
+<em>Ocultación inteligente de objetos:</em> según el valor elegido, se ocultan los objetos que hay en un número determinado de casillas alrededor del puntero del ratón. El número de casillas se ajusta con las flechas o escribiendo directamente un número en la casilla.
+</p>
+
+<p>
+<em>Cobertura de estación transparente:</em> muestra el área de influencia de las paradas y estaciones como una zona transparente en lugar de como una rejilla, coloreada con el color del jugador.
+</p>
+
+<p>
+<em>Mostrar cobertura de estaciones:</em> muestra el área de influencia de cada parada o estación.
+</p>
+
+<p>
+<em>Ocultar nombres de estaciones:</em> cambia el estilo con el que se muestra el nombre de cada parada o estación.
+</p>
+
+<p>
+<em>Mostrar barras de espera:</em> activa o desactiva las barras en miniatura que indican la proporción entre las mercancías y los pasajeros que esperan y la capacidad total de la parada.
+</p>
+
+<p>
+<em>Peatones en ciudades:</em> activa o desactiva los peatones que circulan por las <a href="citywindow.txt">áreas urbanas</a>.
+</p>
+
+<p>
+<em>Peatones en paradas:</em> activa o desactiva los peatones que bajan de un vehículo en las <a href="station.txt">paradas</a>.
+</p>
+
+<p>
+<em>Densidad de tráfico:</em> determina la cantidad de coches privados que hay en las <a href="citywindow.txt">áreas urbanas</a>.<br><br>
+El número de coches privados nuevos que se generan en las áreas urbanas depende del tamaño del área y del valor de la densidad de tráfico; los valores altos crean más tráfico privado, y con «0» no se genera ninguno.
+</p>
+
+<p>
+<em>Información sobre convoyes:</em> ajusta cuánta información se muestra sobre los convoyes en la vista de juego.
+</p>
+
+<p>
+<em>Mostrar las paradas del itinerario:</em> si está activado, se muestran todas las paradas y puntos de ruta cuando el itinerario de un vehículo está abierto.
+</p>
+
+<p>
+CONSEJO: hay más opciones, y los valores con los que arranca Simutrans, en el archivo simuconf.tab, que está en la carpeta simutrans/config/.
+</p>
+
+<p>
+<it>Mostrar información de rendimiento</it>
+</p>
+
+<p>
+Debajo de estos ajustes se muestra información sobre el rendimiento del ordenador al ejecutar Simutrans. Los números aparecen en blanco cuando todo va bien; si salen en rojo o en amarillo, puede que tengas que cambiar los ajustes.<br><br>
+Si cambias la velocidad a la que pasa el tiempo en el juego, con el icono de Acelerar <em>>></em> de la parte superior de la vista o con las teclas [,] y [.], el color de los números también puede cambiar.
+</p>
+
+<p>
+<em>Retardo:</em> muestra el tiempo real que transcurre entre fotogramas.
+</p>
+
+<p>
+<em>Inactivo:</em> muestra cuánto tiempo se queda parado el ordenador entre dos actualizaciones de la pantalla. Cuando está por encima de 0, al ordenador le sobra capacidad para ejecutar otras tareas además de Simutrans.
+</p>
+
+<p>
+<em>FPS:</em> los valores altos hacen que los vehículos se muevan con más fluidez. En modo acelerado y en partida en red la tasa de fotogramas es fija; en el resto de casos varía según la carga de trabajo. El valor por defecto se puede fijar con el parámetro de línea de órdenes «-fps» o en el archivo simuconf.tab. Si este número se queda en rojo, el ordenador es demasiado lento para los ajustes actuales: prueba a reducir el tamaño de la ventana de juego.
+</p>
+
+<p>
+<em>Simloops:</em> número de ciclos de simulación por segundo. Si el número se queda en rojo, el ordenador es demasiado lento para los ajustes actuales: prueba con un mapa más pequeño y con menos áreas urbanas.
+</p>
