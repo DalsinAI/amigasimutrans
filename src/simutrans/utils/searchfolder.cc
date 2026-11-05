@@ -164,13 +164,20 @@ void searchfolder_t::search_path(const std::string path, const std::string name,
 	_findclose(hfind);
 #else
 	assert(path.empty() || path[path.length()-1] == '/');
+#ifdef __amigaos__
+	// AmigaDOS has no "." entry: "dir/" (or "" for the current drawer) is the drawer itself
+	lookfor = path;
+#else
 	lookfor = path + ".";
+#endif
 
 	if (DIR* const dir = opendir(lookfor.c_str())) {
+#ifndef __amigaos__
 		int dir_fd = dirfd(dir);
 		if( dir_fd == -1 ) {
 			goto close_dir;
 		}
+#endif
 		lookfor = name + ext;
 
 		while (dirent const* const entry = readdir(dir)) {
@@ -182,9 +189,16 @@ void searchfolder_t::search_path(const std::string path, const std::string name,
 				}
 				else if( entry->d_type == DT_UNKNOWN || entry->d_type == DT_LNK ) {
 					struct stat st;
+#ifdef __amigaos__
+					// libnix has no fstatat()
+					if( stat((path + entry->d_name).c_str(), &st) == -1 ) {
+						continue;
+					}
+#else
 					if( fstatat(dir_fd, entry->d_name, &st, 0) == -1 ) {
 						continue;
 					}
+#endif
 					is_dir = S_ISDIR(st.st_mode);
 				}
 
@@ -205,7 +219,9 @@ void searchfolder_t::search_path(const std::string path, const std::string name,
 
 			}
 		}
+#ifndef __amigaos__
 close_dir:
+#endif
 		closedir(dir);
 	}
 #endif

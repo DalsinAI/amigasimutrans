@@ -1,0 +1,24 @@
+# simuconf.tab, Amiga: the drawer's config/simuconf.tab is this part
+# followed by upstream's simutrans/config/simuconf.tab unchanged. The first
+# value given for a key is the one Simutrans takes, so these come first.
+# (amiga/Makefile.amigaos, dist)
+#
+# Everything (settings.xml, save/, screenshot/, maps/) stays in the drawer.
+singleuser_install = 1
+# pak64 comes in the drawer: start with it, no pakset choice.
+pak_file_path = pak/
+# A 640x480 16-bit screen of the game's own (-screensize WxH for another
+# size; fullscreen = 0 for a window on a 16 or 32-bit Workbench).
+display_width  = 640
+display_height = 480
+fullscreen = 1
+# A 68040 draws far fewer frames than a PC.
+frames_per_second = 15
+fast_forward_frames_per_second = 5
+simple_drawing_fast_forward = 1
+# Faster to write than bzip2 on a 68k.
+saveformat = zipped
+autosaveformat = zipped
+threads = 1
+#
+############################# upstream from here ##############################
