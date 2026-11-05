@@ -115,7 +115,7 @@ void memory_rw_t::rdwr_longlong(sint64 &ll)
 #ifdef SIM_BIG_ENDIAN
 	sint64  ii;
 	if(is_saving()) {
-		ii = endian(ii);
+		ii = endian(ll);
 	}
 	rdwr(&ii, sizeof(sint64));
 	if(is_loading()) {
