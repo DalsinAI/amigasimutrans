@@ -354,6 +354,10 @@ int dr_rename(const char *existing_utf8, const char *new_utf8)
 #endif
 }
 
+#ifdef __amigaos__
+extern "C" int amiga_is_drawer(const char *path);
+#endif
+
 int dr_chdir(const char *path)
 {
 #ifdef _WIN32
@@ -371,6 +375,13 @@ int dr_chdir(const char *path)
 	}
 
 	return success ? 0 : -1;
+#elif defined __amigaos__
+	// AmigaDOS would make a file the current "directory" (amiga/amiga_dir.c)
+	if(  !amiga_is_drawer(path)  ) {
+		errno = ENOTDIR;
+		return -1;
+	}
+	return chdir(path);
 #else
 	return chdir(path);
 #endif

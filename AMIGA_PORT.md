@@ -7,7 +7,9 @@ License, see LICENSE.txt), the open-source transport simulation, for
 AmigaOS 3.2 on a 68040 or 68060 with an FPU, on OpenGPU's SDL 2, with the
 pak64 graphics set.
 
-Status: builds and links; not yet run in the lab.
+Status: runs in the lab (AmigaChrome, OpenGPU 0.6): main menu with pak64,
+a new 64x64 map, building rail, saving, loading it back and quitting to
+the Workbench with no screen left behind.
 
 
 What you need
@@ -18,7 +20,7 @@ What you need
   32-bit colour that SDL 2 can open.
 - OpenGPU's runtime, which OpenUp installs: opengpu.library and
   LIBS:OpenGPU/SDL2.module (picture, keyboard, mouse and sound, through AHI).
-- Fast RAM: 64 MB at the very least, 128 MB better (see Memory below).
+- Fast RAM: 128 MB (a small game uses about 70 MB; see Memory below).
 - About 30 MB of disk.
 
 
@@ -79,7 +81,9 @@ Squirrel scripts of the AI players and scenarios).
 Memory
 ------
 
-Expected, not yet measured: about 35-50 MB with pak64 and a 128x128 map.
+Measured in the lab: about 69 MB of Fast RAM in use during a 64x64 game
+(free Fast RAM 449 MB in the game, 518 MB after quitting). So 128 MB of
+Fast RAM is the practical minimum. Where it goes:
 - pak64: every picture is kept in memory, as 16-bit run-length data (about
   12 MB), with its descriptions, the vehicle and building tables, and the
   sounds (about 2 MB of WAV, converted to SDL's output format).
@@ -180,6 +184,12 @@ All under #ifdef __amigaos__, but the memory_rw.cc fix:
   HOME); a drawer at a volume's root gets no '/' after its ':'; no
   realpath(); no pakset download script; fonts are looked for in
   PROGDIR:font/ and FONTS:.
+- sys/simsys.cc, dr_chdir(): AmigaDOS locks a file as readily as a drawer,
+  and libnix's chdir() then makes the file the current directory.
+  gui_theme.cc changes to the theme file's "drawer", which for themes.tab
+  is the file itself; on Linux chdir() refuses it, here every relative open
+  after it failed and no theme images loaded ("Wrong theme loaded").
+  dr_chdir() now refuses anything that is not a drawer (amiga/amiga_dir.c).
 - utils/searchfolder.cc: AmigaDOS has no "." entry, and libnix no dirfd()
   or fstatat().
 - sys/simsys_s2.cc: fullscreen is a screen of its own (SDL_WINDOW_FULLSCREEN)

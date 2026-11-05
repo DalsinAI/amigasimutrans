@@ -58,7 +58,8 @@ SRC     = $(subst $$(COLOUR_DEPTH),16,$(shell sed -n 's/^SOURCES += \(src\/[^ ]*
           src/simutrans/sound/sdl2_sound.cc src/simutrans/music/no_midi.cc
 OBJS    = $(SRC:%.cc=$(OBJDIR)/%.o) \
           $(OBJDIR)/amiga/stack.o $(OBJDIR)/amiga/pthread_stubs.o \
-          $(OBJDIR)/amiga/amiga_screens.o $(OBJDIR)/amiga/net_stubs.o
+          $(OBJDIR)/amiga/amiga_screens.o $(OBJDIR)/amiga/net_stubs.o \
+          $(OBJDIR)/amiga/amiga_dir.o
 
 ICONS   = $(wildcard amiga/icons/*.info)
 
