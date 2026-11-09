@@ -148,8 +148,8 @@ Flags: -noixemul -m68040 -m68881 -O2 -std=gnu++14, GCC 16's
 The build machine is short of memory: -j2 at most (no single file needs
 more than about 250 MB to compile).
 
-Icons: amiga/icons/icons.json, from Simutrans' own program icon
-(src/android/icon.png):
+Icons: amiga/icons/icons.json, from our own GlowIcon art
+(amiga/icons/art/simutrans.svg):
 
     python3 AMICRADLE/scripts/port_icons.py amiga/icons/icons.json --out amiga/icons
 
