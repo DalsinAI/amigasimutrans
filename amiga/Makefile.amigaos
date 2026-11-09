@@ -97,7 +97,6 @@ dist: $(BUILD)/$(PROG) $(ICONS) amiga/simuconf-amiga.tab AMIGA_PORT.md
 	cp amiga/icons/Simutrans.info amiga/icons/ReadMe.info $(OUT)/
 	cp amiga/icons/ReadMe.info $(OUT)/LICENSE.txt.info
 	cp amiga/icons/ReadMe.info $(OUT)/readme.txt.info
-	cd $(OUT) && find . -mindepth 1 -type d | while read d; do cp $(CURDIR)/amiga/icons/Data.info "$$d.info"; done
 	cp amiga/icons/Simutrans-drawer.info dist/Simutrans.info
 
 $(OBJDIR)/amiga/%.o: amiga/%.c
