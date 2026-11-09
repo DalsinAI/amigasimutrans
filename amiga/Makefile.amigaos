@@ -92,6 +92,7 @@ dist: $(BUILD)/$(PROG) $(ICONS) amiga/simuconf-amiga.tab AMIGA_PORT.md
 	  case " $(LANGS) " in *" $${f%.tab} "*) ;; *) rm -f $$f ;; esac; done
 	mkdir -p $(OUT)/save $(OUT)/screenshot $(OUT)/maps
 	cp AMIGA_PORT.md $(OUT)/ReadMe
+	cp amiga/Controls $(OUT)/Controls
 	cp LICENSE.txt $(OUT)/LICENSE.txt
 	cp simutrans/readme.txt $(OUT)/readme.txt
 	cp amiga/icons/Simutrans.info amiga/icons/ReadMe.info $(OUT)/
