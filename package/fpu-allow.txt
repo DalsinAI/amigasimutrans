@@ -1,0 +1,5 @@
+# C constant tables in .text that objdump decodes as FPU instructions
+# (fpu_check can't tell a C table from a C function), in the libraries
+# package/deps.sh builds.
+libfreetype.a _ft_adobe_glyph_list  # FreeType 2.13.3 psnames' static const unsigned char ft_adobe_glyph_list[]
+libfreetype.a _sfnt_id.3  # FreeType sfnt's function-local static const table

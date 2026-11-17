@@ -1,0 +1,20 @@
+{
+  "name": "Simutrans",
+  "version": "125.0.1-amiga4-rc1",
+  "drawer": "Simutrans",
+  "program": "Simutrans",
+  "cpu": "68040",
+  "fpu": true,
+  "space": 40000000,
+  "modules": [
+    "SDL2.module"
+  ],
+  "keep": [
+    "settings.xml",
+    "save",
+    "screenshot",
+    "maps"
+  ],
+  "parent": "Work:Games",
+  "badge": "../amiga/icons/art/simutrans.png"
+}

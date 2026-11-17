@@ -44,3 +44,5 @@ src/android/AndroidAppSettings.cfg
 
 # Amiga port: the game drawer made by amiga/Makefile.amigaos dist
 /dist
+__pycache__/
+build-amiga-package/
